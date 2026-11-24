@@ -69,10 +69,13 @@ async function loadFieldGoals(season) {
   } catch (err) {
     // Before the season starts there is no play-by-play file yet.
     console.warn(`No play-by-play for ${season} yet (${err.message}).`);
-    return [];
+    return { kicks: [], pbpGameIds: new Set() };
   }
   const text = gunzipSync(Buffer.from(await res.arrayBuffer())).toString("utf8");
-  return parseCsv(text)
+  const plays = parseCsv(text);
+  // Games with play-by-play, so a played game with 0 kicks isn't confused with missing data.
+  const pbpGameIds = new Set(plays.map((p) => p.game_id));
+  const kicks = plays
     .filter((p) => p.play_type === "field_goal" && p.field_goal_result !== "NA")
     .map((p) => ({
       game_id: p.game_id,
@@ -87,13 +90,14 @@ async function loadFieldGoals(season) {
       result: str(p.field_goal_result), // made | missed | blocked
       score_diff: num(p.score_differential), // kicking team's margin before the kick
     }));
+  return { kicks, pbpGameIds };
 }
 
 async function main() {
   const season = Number(process.argv[2]) || defaultSeason();
   console.log(`Building field goal data for the ${season} season…`);
 
-  const [schedule, kicks] = await Promise.all([
+  const [schedule, { kicks, pbpGameIds }] = await Promise.all([
     loadSchedule(season),
     loadFieldGoals(season),
   ]);
@@ -114,6 +118,8 @@ async function main() {
     home_team: g.home_team,
     away_score: num(g.away_score),
     home_score: num(g.home_score),
+    location: str(g.location), // Home | Neutral (international and other neutral-site games)
+    has_pbp: pbpGameIds.has(g.game_id),
     stadium: str(g.stadium),
     roof: str(g.roof),
     surface: str(g.surface),

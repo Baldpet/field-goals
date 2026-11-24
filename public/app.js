@@ -31,6 +31,59 @@ function formatDate(gameday, gametime) {
   return gametime ? `${date} · ${gametime} ET` : date;
 }
 
+/* ---------- Team field goal averages (from completed games) ---------- */
+
+// Per team: FG made/attempted and games played, split by home, away and all.
+// Neutral-site games count toward "all" only.
+function buildTeamAverages(games) {
+  const blank = () => ({ games: 0, made: 0, att: 0 });
+  const teams = {};
+  const get = (t) => (teams[t] ??= { home: blank(), away: blank(), all: blank() });
+
+  for (const g of games) {
+    if (!g.has_pbp) continue;
+    for (const [team, side] of [[g.home_team, "home"], [g.away_team, "away"]]) {
+      const kicks = g.field_goals.filter((k) => k.team === team);
+      const made = kicks.filter((k) => k.result === "made").length;
+      const splits = g.location === "Neutral" ? ["all"] : [side, "all"];
+      for (const s of splits) {
+        const bucket = get(team)[s];
+        bucket.games++;
+        bucket.made += made;
+        bucket.att += kicks.length;
+      }
+    }
+  }
+  return teams;
+}
+
+function avgCell(bucket, highlight) {
+  if (!bucket || !bucket.games) return `<td class="${highlight ? "hl" : ""}">–</td>`;
+  const avg = (bucket.made / bucket.games).toFixed(2);
+  const title = `${bucket.made} made, ${bucket.att} attempted in ${bucket.games} game${bucket.games === 1 ? "" : "s"}`;
+  return `<td class="${highlight ? "hl" : ""}" title="${title}">${avg}</td>`;
+}
+
+function averagesPanel(g) {
+  const neutral = g.location === "Neutral";
+  const row = (team, side) => {
+    const t = state.averages[team] ?? {};
+    return `<tr>
+      <th scope="row">${esc(team)} <small>${neutral ? "" : side}</small></th>
+      ${avgCell(t.home, !neutral && side === "home")}
+      ${avgCell(t.away, !neutral && side === "away")}
+      ${avgCell(t.all, neutral)}
+    </tr>`;
+  };
+  return `<div class="averages">
+    <p class="averages-title">FG made per game, this season${neutral ? " · neutral site" : ""}</p>
+    <table>
+      <thead><tr><th></th><th>Home</th><th>Away</th><th>All</th></tr></thead>
+      <tbody>${row(g.away_team, "away")}${row(g.home_team, "home")}</tbody>
+    </table>
+  </div>`;
+}
+
 const esc = (s) =>
   String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
@@ -72,7 +125,9 @@ function gameCard(g) {
           </li>`
         )
         .join("")}</ul>`
-    : `<p class="none">${played ? "No field goal attempts." : "Not played yet."}</p>`;
+    : played
+      ? `<p class="none">No field goal attempts.</p>`
+      : averagesPanel(g);
 
   const made = g.field_goals.filter((k) => k.result === "made").length;
   const fgSummary = g.field_goals.length ? `FG ${made}/${g.field_goals.length}` : "";
@@ -210,6 +265,7 @@ async function init() {
   }
 
   const { games, season, generated_at } = state.data;
+  state.averages = buildTeamAverages(games);
   $("#season-label").textContent = season;
   $("#updated").textContent = `Updated ${new Date(generated_at).toLocaleString()}`;
 

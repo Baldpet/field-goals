@@ -3,7 +3,7 @@
 The NFL schedule combined with every field goal attempt, built from free
 [nflverse](https://github.com/nflverse) data and hosted on GitHub Pages.
 
-- **Schedule view:** pick a week and team to see each game's score, venue, weather and every field goal attempt (quarter, kicker, distance, result).
+- **Schedule view:** pick a week and team to see each game's score, venue, weather and every field goal attempt (quarter, kicker, distance, result). Upcoming fixtures show each team's average field goals made per game this season, split by home, away and all games, with the split that applies to that fixture highlighted. Neutral-site games count only toward the "all" average.
 - **Kickers view:** sortable season leaderboard with FG%, long, and splits by distance (0-39, 40-49, 50+).
 
 Plain JavaScript with no dependencies and no build step.
@@ -42,6 +42,7 @@ Each game in `field_goals.json`:
 |---|---|
 | `game_id`, `game_type`, `week`, `gameday`, `gametime` | `game_type` is REG, WC, DIV, CON or SB; `gametime` is US Eastern |
 | `away_team`, `home_team`, `away_score`, `home_score` | Scores are `null` until the game is played |
+| `location`, `has_pbp` | `location` is Home or Neutral; `has_pbp` is true once play-by-play exists for the game |
 | `stadium`, `roof`, `surface`, `temp`, `wind` | Weather fields are `null` for domes and unplayed games |
 | `field_goals[]` | `qtr`, `time`, `team`, `opponent`, `kicker`, `kicker_id`, `distance`, `result` (made, missed or blocked), `score_diff` (kicking team's margin before the kick) |
 

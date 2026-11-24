@@ -77,6 +77,16 @@ select, input {
 .pill.blocked { color: var(--blocked); background: color-mix(in srgb, var(--blocked) 14%, transparent); }
 .none { font-size: 13px; color: var(--muted); margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
 
+.averages { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.averages-title { margin: 0 0 6px; font-size: 12px; color: var(--muted); }
+.averages table { border: 0; border-radius: 0; background: transparent; font-size: 13px; }
+.averages th, .averages td { padding: 4px 6px; cursor: default; }
+.averages table thead th, .averages table td { text-align: right; }
+.averages tbody th { text-align: left; font-weight: 600; color: var(--text); font-size: 13px; }
+.averages tbody th small { color: var(--muted); font-weight: 400; }
+.averages td.hl { font-weight: 700; background: color-mix(in srgb, var(--accent) 12%, transparent); border-radius: 6px; }
+.averages tbody tr:last-child th { border-bottom: 0; }
+
 table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; white-space: nowrap; }
 th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
