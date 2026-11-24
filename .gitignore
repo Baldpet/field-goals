@@ -1,0 +1,5 @@
+# Built by scripts/build-data.mjs (locally and in GitHub Actions)
+public/data/
+
+node_modules/
+.DS_Store

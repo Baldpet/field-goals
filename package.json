@@ -1,0 +1,15 @@
+{
+  "name": "field-goals",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NFL schedule combined with field goal data from nflverse, deployed to GitHub Pages.",
+  "type": "module",
+  "scripts": {
+    "data": "node scripts/build-data.mjs",
+    "serve": "node scripts/serve.mjs",
+    "dev": "node scripts/build-data.mjs && node scripts/serve.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
